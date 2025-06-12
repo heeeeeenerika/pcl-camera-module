@@ -13,7 +13,7 @@ const size_t END_MARKER_LEN = sizeof(END_MARKER);
 
 void setup() {
     Serial.begin(115200);
-    Serial1.begin(57600, SERIAL_8N1, RX_PIN, TX_PIN);
+    Serial1.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
 
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
@@ -108,11 +108,31 @@ void loop() {
             //Serial.println("Capture command received, taking picture...");
             camera_fb_t *fb = esp_camera_fb_get();
             if (fb) {
-                Serial.println("test print 1");
-                Serial1.write((const uint8_t *)fb->buf, fb->len); // Bilddaten senden
+                Serial.println("image was taken, size: " + String(fb->len) + " bytes");
+
+                if (false) {
+                    Serial.println("raw image data:");
+                    for (size_t i = 0; i < fb->len; i++) {
+                        if (fb->buf[i] < 16) {
+                            Serial.print("0"); // Füge führende Null hinzu, wenn nötig
+                        }
+                        Serial.print(fb->buf[i], HEX);
+                        Serial.print(" ");
+                    }
+                    Serial.println();
+                }
+
+                // Senden des Bildes
+                for (size_t i = 0; i < fb->len; i++) {
+                    Serial1.write(fb->buf[i]);
+                }
+
+                // Senden des Endmarkers
+                for (size_t i = 0; i < END_MARKER_LEN; i++) {
+                    Serial1.write(END_MARKER[i]);
+                }
+                Serial1.flush();
                 esp_camera_fb_return(fb);
-                Serial1.write(END_MARKER, END_MARKER_LEN); // Endemarkierung senden
-                Serial1.flush(); // Sicherstellen, dass alle Daten gesendet wurden
             }
 
             Serial.println("Command finished, picture taken and sent!");
