@@ -52,7 +52,7 @@ void setup() {
             config.grab_mode = CAMERA_GRAB_LATEST;
         } else {
             // Limit the frame size when PSRAM is not available
-            config.frame_size = FRAMESIZE_SVGA;
+            config.frame_size = FRAMESIZE_QVGA;
             config.fb_location = CAMERA_FB_IN_DRAM;
         }
     } else {
